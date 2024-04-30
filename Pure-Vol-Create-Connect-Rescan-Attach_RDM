@@ -1,0 +1,62 @@
+##### WORK IN PROGRESS ######
+# The Following is created by Pure SE Ned Egan, issued with no warranty
+# This script is designed to create a Pure volume and connect it to hosts, and ultimately as a RDM to a specific VM inside a VMware Cluster
+
+Connect-VIserver -Force $vcenter -user $vcuser -password $vcpass
+$vcenter  = "VC1.ne-lab.local"
+$vcuser   = "administrator@puremagic.local"
+$vcpass   = "P@ssword"
+$esxihosts = "esx-host1.ne-lab.local", "esx-host2.ne-lab.local"
+$endpoint = "nelab-flasharray1.ne-lab.local"
+$VolumeName = "AVol1"
+$size = "2200GB"
+$cred = Get-Credential -Message "Enter credentials for Pure Array"
+$pgname = "ProdProtection-NoRep"
+$hostgroup = "Nashville"
+$VM = Get-VM -Name "NFS-Client"
+$hostess = Get-VMHost -VM $VM
+$DeviceName = ($ScsiLuns | Where-Object {$_.CanonicalName -match "naa.***"}).ConsoleDeviceName
+
+# imports
+Import-Module PureStoragePowerShellSDK2
+Import-Module vmware.powercli
+
+# Connect to your Pure Storage FlashArray
+Connect-Pfa2Array -IgnoreCertificateError -Endpoint $endpoint -Credential $cred
+
+# Create the volume
+New-Pfa2Volume -Array $Array -Name $VolumeName -Provisioned $size -AddToProtectionGroupNames $pgname
+
+# Retrieve a volume and connect it to the host & host group
+Get-Pfa2Volume -Array $FlashArray | Where-Object { $_.name -like "$VolumeName" } | Format-Table -AutoSize
+New-Pfa2Connection -Array $FlashArray -VolumeNames $VolumeName -HostGroupNames $hostgroup
+
+# Connect to vCenter
+Connect-VIserver -Force $vcenter -user $vcuser -password $vcpass
+foreach ($esxihost in $esxihosts) {
+    $HostView = Get-VMHost -Name $esxihost
+    Write-Host "Rescanning storage on $esxihost ..."
+    $HostView | Get-VMHostStorage -RescanAllHba
+    Write-Host "Rescan completed for $esxihost"
+}
+
+####Work-in-progress####
+#Create RDM disk on the VM
+
+# Get the host where the VM is located
+$hostess
+
+# Create the RDM disk
+New-HardDisk -VM $VM -DiskType RawPhysical -DeviceName $deviceName
+
+$VM = Get-VM -Name "NFS-Client"
+Get-VM $VM|Get-HardDisk|FL
+#End of script
+
+#### Additional Options and Utilities ######
+# Disconnect from the vCenter Server
+Disconnect-VIServer -Server * -Confirm:$false
+
+# List SCSI volumes connected to host
+## This will give you the naa.*** to add to the VM
+$ScsiLUNs | Format-Table -Property Name, CanonicalName, CapacityGB, Vendor, Model, Serial, LunType

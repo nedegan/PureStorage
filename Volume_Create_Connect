@@ -1,0 +1,52 @@
+#####
+# Work in progress
+#####
+$endpoint = "nelab-flasharray1.ne-lab.local"
+$user = "pureuser"
+$password = "P@ssword1"
+$VolumeName = "AVol2"
+$size = "530GB"
+$cred = Get-Credential -Message "Enter credentials for Pure Array"
+
+# Import the Pure Storage module
+Import-Module PureStoragePowerShellSDK2
+
+# Connect to your Pure Storage FlashArray
+Connect-Pfa2Array -IgnoreCertificateError -Endpoint $endpoint -Credential $cred
+# Define volume parameters
+
+
+# Create the volume
+New-Pfa2Volume -Array $Array -Name $VolumeName -Provisioned $size
+
+# Disconnect from the FlashArray
+Disconnect-Pfa2Array -Array $Array -Confirm:$false
+
+
+#####
+# Work in progress
+#####
+$endpoint = "nelab-flasharray1.ne-lab.local"
+$VolumeName = "AVol2"
+$size = "530GB"
+$cred = Get-Credential -Message "Enter credentials for Pure Array"
+$pgname = "ProdProtection-NoRep"
+$hostgroup = "Nashville"
+
+# Import the Pure Storage module
+Import-Module PureStoragePowerShellSDK2
+
+# Connect to your Pure Storage FlashArray
+Connect-Pfa2Array -IgnoreCertificateError -Endpoint $endpoint -Credential $cred
+
+# Create the volume
+New-Pfa2Volume -Array $Array -Name $VolumeName -Provisioned $size -AddToProtectionGroupNames $pgname
+
+# Retrieve a volume and connect it to the host & host group
+Get-Pfa2Volume -Array $FlashArray | Where-Object { $_.name -like "$VolumeName" } | Format-Table -AutoSize
+New-Pfa2Connection -Array $FlashArray -VolumeNames $VolumeName -HostGroupNames $hostgroup
+
+
+# Retrieve a volume and connect it to the host & host group
+Get-Pfa2Volume -Array $FlashArray | Where-Object { $_.name -like "SDK*" } | Format-Table -AutoSize
+New-Pfa2Connection -Array $FlashArray -VolumeNames "SDKv2-Sample-2" -HostGroupNames "SDKv2-HostGroup"

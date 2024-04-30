@@ -1,0 +1,63 @@
+#####
+# Steps
+# imports
+# Connect to Pure FA
+# Create Pure Vol
+# Connect Pure Vol to Host(s)
+# Connect Pure Vol to ProtectionGroup
+# Rescan ESX HBAs
+# Add RDM disk to VM
+#####
+
+$vcenter  = "VC1.ne-lab.local"
+$vcuser   = "administrator@puremagic.local"
+$vcpass   = "P@ssword1"
+$esxihosts = "esx-host1.ne-lab.local", "esx-host2.ne-lab.local"
+$endpoint = "nelab-flasharray1.ne-lab.local"
+$VolumeName = "AVol1"
+$size = "670GB"
+$cred = Get-Credential -Message "Enter credentials for Pure Array"
+$pgname = "ProdProtection-NoRep"
+$hostgroup = "Nashville"
+$VM = Get-VM -Name "NFS-Client"
+$VMhost = Get-VMHost -VM $VM
+$deviceName = ($VMhost | Get-ScsiLun | Where {$_.CanonicalName -match "naa"})[0].ConsoleDeviceName
+
+# imports
+Import-Module PureStoragePowerShellSDK2
+Import-Module vmware.powercli
+
+# Connect to your Pure Storage FlashArray
+Connect-Pfa2Array -IgnoreCertificateError -Endpoint $endpoint -Credential $cred
+
+# Create the volume
+New-Pfa2Volume -Array $Array -Name $VolumeName -Provisioned $size -AddToProtectionGroupNames $pgname
+
+# Retrieve a volume and connect it to the host & host group
+Get-Pfa2Volume -Array $FlashArray | Where-Object { $_.name -like "$VolumeName" } | Format-Table -AutoSize
+New-Pfa2Connection -Array $FlashArray -VolumeNames $VolumeName -HostGroupNames $hostgroup
+
+# Connect to vCenter
+Connect-VIserver -Force $vcenter -user $vcuser -password $vcpass
+foreach ($esxihost in $esxihosts) {
+    $HostView = Get-VMHost -Name $esxihost
+    Write-Host "Rescanning storage on $esxihost ..."
+    $HostView | Get-VMHostStorage -RescanAllHba
+    Write-Host "Rescan completed for $esxihost"
+}
+
+####Work-in-progress####
+#Create RDM disk on the VM
+
+# Get the host where the VM is located
+$VMhost
+
+# Create the RDM disk
+New-HardDisk -VM $VM -DiskType RawPhysical -DeviceName $deviceName
+# Obtains a valid device name for Raw Disk Mapping. Then the command creates an RDM hard disk for the specified virtual machine with the obtained device name.
+
+$VM = Get-VM -Name "NFS-Client"
+Get-VM $VM|Get-HardDisk|FL
+
+# Disconnect from the vCenter Server
+Disconnect-VIServer -Server * -Confirm:$false
