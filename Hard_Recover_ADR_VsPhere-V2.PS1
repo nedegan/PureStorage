@@ -7,9 +7,9 @@ $vcpass   = "P@ssword1"
 $endpoint = "nelab-flasharray2.ne-lab.local"
 $podname  = "DRPod-Target"
 $cluster  = "Prod"
+
+# Below $dsname needs to be the source vcenter's datastore name
 $dsname   = "Source-VolA"
-$user = "pureuser"
-$password = "P@ssword1"
 $cred = Get-Credential -Message "Enter credentials for Pure Array"
 # imports
 Import-Module PureStoragePowerShellSDK2
@@ -46,6 +46,8 @@ if ($Snaps.Count -gt 0) {
 } else {
     Write-Host "No Snapshot volumes found"
 }
+
+# convert the shrt $dsname from above to the long "snap.name"
 $Datastore = Get-Datastore
 foreach($Datastore in $Datastore) {
     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
