@@ -1,0 +1,434 @@
+Last login: Tue Apr 30 14:31:18 on ttys006
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+Neds-MacBook-Pro15-4:~ ned$ $vcenter  = "VC1.ne-lab.local"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $vcuser   = "administrator@puremagic.local"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $vcpass   = "P@ssword1"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $endpoint = "nelab-flasharray2.ne-lab.local"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $podname  = "DRPod-Target"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $cluster  = "Prod"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $dsname   = "Source-VolA"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $user = "pureuser"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $password = "P@ssword1"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $cred = Get-Credential -Message "Enter credentials for Pure Array"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ # imports
+Neds-MacBook-Pro15-4:~ ned$ Import-Module PureStoragePowerShellSDK2
+-bash: Import-Module: command not found
+Neds-MacBook-Pro15-4:~ ned$ Import-Module vmware.powercli
+-bash: Import-Module: command not found
+Neds-MacBook-Pro15-4:~ ned$ # Connect to vCenter
+Neds-MacBook-Pro15-4:~ ned$ Connect-VIserver -Force $vcenter -user $vcuser -password $vcpass
+-bash: Connect-VIserver: command not found
+Neds-MacBook-Pro15-4:~ ned$ # Promote the DR Site Pod
+Neds-MacBook-Pro15-4:~ ned$ # $promote = "purepod promote $podname"
+Neds-MacBook-Pro15-4:~ ned$ # New-PfaCLICommand -EndPoint $endpoint -CommandText $promote -UserName $username -Password (ConvertTo-SecureString -AsPlainText $password -Force)
+Neds-MacBook-Pro15-4:~ ned$ # Invoke-Pfa2CLICommand -Credential $cred -EndPoint $endpoint -CommandText $promote
+Neds-MacBook-Pro15-4:~ ned$ # or the following:
+Neds-MacBook-Pro15-4:~ ned$ # $RemotePod = Get-Pfa2Pod -Name $podname
+Neds-MacBook-Pro15-4:~ ned$ # Update-Pfa2Pod -Array $TargetArray -Name $RemotePod.Name  -RequestedPromotionState "promoted"
+Neds-MacBook-Pro15-4:~ ned$ # From Jase: connect to target pod and promote it
+Neds-MacBook-Pro15-4:~ ned$ Connect-Pfa2Array -IgnoreCertificateError -Endpoint $endpoint -Credential $cred
+-bash: Connect-Pfa2Array: command not found
+Neds-MacBook-Pro15-4:~ ned$ $ADRPOD = Get-Pfa2Pod -Name $podname
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ Update-Pfa2Pod -Name $ADRPOD.Name -RequestedPromotionState "promoted" #promote the pod
+-bash: Update-Pfa2Pod: command not found
+Neds-MacBook-Pro15-4:~ ned$ #
+Neds-MacBook-Pro15-4:~ ned$ # Wait for the DR Site Pod to be promoted
+Neds-MacBook-Pro15-4:~ ned$ $podstatus = "purepod list $podname"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ do {
+-bash: syntax error near unexpected token `do'
+Neds-MacBook-Pro15-4:~ ned$     Write-Host "Waiting for Pod Promotion"
+-bash: Write-Host: command not found
+Neds-MacBook-Pro15-4:~ ned$     Start-Sleep -Milliseconds 500
+-bash: Start-Sleep: command not found
+Neds-MacBook-Pro15-4:~ ned$     $test = Invoke-Pfa2CLICommand -EndPoint $endpoint -CommandText $podstatus -Credential $cred
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ } while ($test | select-string -pattern "promoting")
+-bash: syntax error near unexpected token `}'
+Neds-MacBook-Pro15-4:~ ned$ $VMHost = Get-VMhost | Select-Object -First 1
+-bash: =: command not found
+-bash: Select-Object: command not found
+Neds-MacBook-Pro15-4:~ ned$ $EsxCli = Get-EsxCli -VMHost $VMhost -V2
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ $Snaps = $esxcli.storage.vmfs.snapshot.list.invoke()
+-bash: syntax error near unexpected token `('
+Neds-MacBook-Pro15-4:~ ned$ if ($Snaps.Count -gt 0) {
+-bash: syntax error near unexpected token `{'
+Neds-MacBook-Pro15-4:~ ned$     Foreach ($Snap in $Snaps) {
+-bash: syntax error near unexpected token `$Snap'
+Neds-MacBook-Pro15-4:~ ned$         Write-Host "Snapshot Found: $($Snap.VolumeName)"
+-bash: .VolumeName: command not found
+-bash: Write-Host: command not found
+Neds-MacBook-Pro15-4:~ ned$         $esxcli.storage.vmfs.snapshot.resignature.invoke(@{volumelabel=$($Snap.VolumeName)})
+-bash: syntax error near unexpected token `@{volumelabel=$($Snap.VolumeName)}'
+Neds-MacBook-Pro15-4:~ ned$     }
+-bash: syntax error near unexpected token `}'
+Neds-MacBook-Pro15-4:~ ned$ } else {
+-bash: syntax error near unexpected token `}'
+Neds-MacBook-Pro15-4:~ ned$     Write-Host "No Snapshot volumes found"
+-bash: Write-Host: command not found
+Neds-MacBook-Pro15-4:~ ned$ }
+-bash: syntax error near unexpected token `}'
+Neds-MacBook-Pro15-4:~ ned$ foreach($Datastore in $Datastore) {
+-bash: syntax error near unexpected token `$Datastore'
+Neds-MacBook-Pro15-4:~ ned$     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
+-bash: syntax error near unexpected token `-like'
+Neds-MacBook-Pro15-4:~ ned$ }
+-bash: syntax error near unexpected token `}'
+Neds-MacBook-Pro15-4:~ ned$ $VMFolder  = Get-Folder -Type VM -Name "Discovered virtual machine"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$ foreach($Datastore in $Datastore) {
+-bash: syntax error near unexpected token `$Datastore'
+Neds-MacBook-Pro15-4:~ ned$     # Searches for .VMX Files in datastore variable
+Neds-MacBook-Pro15-4:~ ned$     $ds = Get-Datastore -Name $Datastore | %{Get-View $_.Id}
+-bash: =: command not found
+-bash: %{Get-View: command not found
+Neds-MacBook-Pro15-4:~ ned$     $SearchSpec = New-Object VMware.Vim.HostDatastoreBrowserSearchSpec
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$     $SearchSpec.matchpattern = "*.vmx"
+-bash: .matchpattern: command not found
+Neds-MacBook-Pro15-4:~ ned$     $dsBrowser = Get-View $ds.browser
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$     $DatastorePath = "[" + $ds.Summary.Name + "]"
+-bash: =: command not found
+Neds-MacBook-Pro15-4:~ ned$     # Find all .VMX file paths in Datastore variable and filters out .snapshot
+Neds-MacBook-Pro15-4:~ ned$     $SearchResults = $dsBrowser.SearchDatastoreSubFolders($DatastorePath,$SearchSpec) | Where-Object {$_.FolderPath -notmatch ".snapshot"} | %{$_.FolderPath + $_.File.Path}
+-bash: syntax error near unexpected token `('
+Neds-MacBook-Pro15-4:~ ned$     # Register all .VMX files with vCenter
+Neds-MacBook-Pro15-4:~ ned$     foreach($SearchResult in $SearchResults) {
+-bash: syntax error near unexpected token `$SearchResult'
+Neds-MacBook-Pro15-4:~ ned$     New-VM -VMFilePath $SearchResult -VMHost $VMHost -Location $VMFolder -RunAsync -ErrorAction SilentlyContinue
+-bash: New-VM: command not found
+Neds-MacBook-Pro15-4:~ ned$    }
+-bash: syntax error near unexpected token `}'
+Neds-MacBook-Pro15-4:~ ned$ }clear
+-bash: }clear: command not found
+Neds-MacBook-Pro15-4:~ ned$ pwsh
+PowerShell 7.4.1
+
+   A new PowerShell stable release is available: v7.4.2 
+   Upgrade now, or check out the release page at:       
+     https://aka.ms/PowerShell-Release?tag=v7.4.2       
+
+PS /Users/ned> clear                                                                          
+
+PS /Users/ned> $vcenter  = "VC1.ne-lab.local"
+PS /Users/ned> $vcuser   = "administrator@puremagic.local"
+PS /Users/ned> $vcpass   = "P@ssword1"
+PS /Users/ned> $endpoint = "nelab-flasharray2.ne-lab.local"
+PS /Users/ned> $podname  = "DRPod-Target"
+PS /Users/ned> $cluster  = "Prod"
+PS /Users/ned> $dsname   = "Source-VolA"
+PS /Users/ned> $user = "pureuser"
+PS /Users/ned> $password = "P@ssword1"
+PS /Users/ned> $cred = Get-Credential -Message "Enter credentials for Pure Array"
+
+PowerShell credential request
+Enter credentials for Pure Array
+User: pureuser
+Password for user pureuser: *********
+
+PS /Users/ned> # imports
+PS /Users/ned> Import-Module PureStoragePowerShellSDK2
+PS /Users/ned> Import-Module vmware.powercli
+          Welcome to VMware PowerCLI!
+
+Log in to a vCenter Server or ESX host:              Connect-VIServer
+To find out what commands are available, type:       Get-VICommand
+To show searchable help for all PowerCLI commands:   Get-PowerCLIHelp
+Once you've connected, display all virtual machines: Get-VM
+If you need more help, visit the PowerCLI community: Get-PowerCLICommunity
+
+       Copyright (C) VMware, Inc. All rights reserved.
+
+
+PS /Users/ned> # Connect to vCenter
+PS /Users/ned> Connect-VIserver -Force $vcenter -user $vcuser -password $vcpass
+
+Name                           Port  User
+----                           ----  ----
+VC1.ne-lab.local               443   PUREMAGIC.LOCAL\Administrator
+
+PS /Users/ned> # Promote the DR Site Pod
+PS /Users/ned> # $promote = "purepod promote $podname"
+PS /Users/ned> # New-PfaCLICommand -EndPoint $endpoint -CommandText $promote -UserName $username -Password (ConvertTo-SecureString -AsPlainText $password -Force)
+PS /Users/ned> # Invoke-Pfa2CLICommand -Credential $cred -EndPoint $endpoint -CommandText $promote
+PS /Users/ned> # or the following:
+PS /Users/ned> # $RemotePod = Get-Pfa2Pod -Name $podname
+PS /Users/ned> # Update-Pfa2Pod -Array $TargetArray -Name $RemotePod.Name  -RequestedPromotionState "promoted"
+PS /Users/ned> # From Jase: connect to target pod and promote it
+PS /Users/ned> Connect-Pfa2Array -IgnoreCertificateError -Endpoint $endpoint -Credential $cred
+
+ArrayName                      ApiVersion
+---------                      ----------
+nelab-flasharray2.ne-lab.local 2.26
+
+PS /Users/ned> $ADRPOD = Get-Pfa2Pod -Name $podname
+PS /Users/ned> Update-Pfa2Pod -Name $ADRPOD.Name -RequestedPromotionState "promoted" #promote the pod
+
+Id                      : 17fcc220-e3d6-8c33-a85f-73cfaacdec7e
+Name                    : DRPod-Target
+Arrays                  : {@{Id='10c87e0a-001a-47b8-8719-a2096197c698'; Name='NELab-FlashArray2'; MediatorStatus='online'; 
+                          PreElected=False; Status='online'}}
+Destroyed               : False
+FailoverPreferences     : {}
+Footprint               : 1352551127
+Mediator                : purestorage
+MediatorVersion         : 
+Source                  : 
+Space                   : @{DataReduction=6.7466874; Shared=0; Snapshots=0; ThinProvisioning=0.9880494; 
+                          TotalPhysical=353606137; TotalProvisioned=1099511627776; TotalReduction=564.54736; Unique=353606137; 
+                          Virtual=13139839488; UsedProvisioned=1099511627776; Replication=0}
+TimeRemaining           : 
+LinkSourceCount         : 1
+LinkTargetCount         : 0
+PromotionStatus         : promoting
+RequestedPromotionState : promoted
+ArrayCount              : 1
+EradicationConfig       : @{ManualEradication='all-enabled'}
+QuotaLimit              : 0
+
+PS /Users/ned> #
+PS /Users/ned> # Wait for the DR Site Pod to be promoted
+PS /Users/ned> $podstatus = "purepod list $podname"
+PS /Users/ned> do {
+>>     Write-Host "Waiting for Pod Promotion"
+>>     Start-Sleep -Milliseconds 500
+>>     $test = Invoke-Pfa2CLICommand -EndPoint $endpoint -CommandText $podstatus -Credential $cred
+>> } while ($test | select-string -pattern "promoting")
+Waiting for Pod Promotion
+Waiting for Pod Promotion
+PS /Users/ned> $VMHost = Get-VMhost | Select-Object -First 1
+PS /Users/ned> $EsxCli = Get-EsxCli -VMHost $VMhost -V2
+PS /Users/ned> $Snaps = $esxcli.storage.vmfs.snapshot.list.invoke()
+PS /Users/ned> if ($Snaps.Count -gt 0) {
+>>     Foreach ($Snap in $Snaps) {
+>>         Write-Host "Snapshot Found: $($Snap.VolumeName)"
+>>         $esxcli.storage.vmfs.snapshot.resignature.invoke(@{volumelabel=$($Snap.VolumeName)})
+>>     }
+>> } else {
+>>     Write-Host "No Snapshot volumes found"
+>> }
+No Snapshot volumes found
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
+>> }
+PS /Users/ned> $VMFolder  = Get-Folder -Type VM -Name "Discovered virtual machine"
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     # Searches for .VMX Files in datastore variable
+>>     $ds = Get-Datastore -Name $Datastore | %{Get-View $_.Id}
+>>     $SearchSpec = New-Object VMware.Vim.HostDatastoreBrowserSearchSpec
+>>     $SearchSpec.matchpattern = "*.vmx"
+>>     $dsBrowser = Get-View $ds.browser
+>>     $DatastorePath = "[" + $ds.Summary.Name + "]"
+>>     # Find all .VMX file paths in Datastore variable and filters out .snapshot
+>>     $SearchResults = $dsBrowser.SearchDatastoreSubFolders($DatastorePath,$SearchSpec) | Where-Object {$_.FolderPath -notmatch ".snapshot"} | %{$_.FolderPath + $_.File.Path}
+>>     # Register all .VMX files with vCenter
+>>     foreach($SearchResult in $SearchResults) {
+>>     New-VM -VMFilePath $SearchResult -VMHost $VMHost -Location $VMFolder -RunAsync -ErrorAction SilentlyContinue
+>>    }
+>> }
+PS /Users/ned> 
+PS /Users/ned> 
+PS /Users/ned> $snaps
+PS /Users/ned> $Snaps = $esxcli.storage.vmfs.snapshot.list.invoke()
+PS /Users/ned> $snaps                                              
+
+Canmount                      : true
+Canresignature                : true
+Reasonfornonresignaturability : 
+Reasonforunmountability       : 
+UnresolvedExtentCount         : 1
+VMFSUUID                      : 66314684-a66dc2f6-76ca-a03d6f8816ba
+VolumeName                    : Source-VolA
+
+PS /Users/ned> if ($Snaps.Count -gt 0) {    
+>>     Foreach ($Snap in $Snaps) {
+>>         Write-Host "Snapshot Found: $($Snap.VolumeName)"
+>>         $esxcli.storage.vmfs.snapshot.resignature.invoke(@{volumelabel=$($Snap.VolumeName)})
+>>     }
+>> } else {
+>>     Write-Host "No Snapshot volumes found"
+>> }
+Snapshot Found: Source-VolA
+true
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
+>> }
+PS /Users/ned> $VMFolder  = Get-Folder -Type VM -Name "Discovered virtual machine"
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     # Searches for .VMX Files in datastore variable
+>>     $ds = Get-Datastore -Name $Datastore | %{Get-View $_.Id}
+>>     $SearchSpec = New-Object VMware.Vim.HostDatastoreBrowserSearchSpec
+>>     $SearchSpec.matchpattern = "*.vmx"
+>>     $dsBrowser = Get-View $ds.browser
+>>     $DatastorePath = "[" + $ds.Summary.Name + "]"
+>>     # Find all .VMX file paths in Datastore variable and filters out .snapshot
+>>     $SearchResults = $dsBrowser.SearchDatastoreSubFolders($DatastorePath,$SearchSpec) | Where-Object {$_.FolderPath -notmatch ".snapshot"} | %{$_.FolderPath + $_.File.Path}
+>>     # Register all .VMX files with vCenter
+>>     foreach($SearchResult in $SearchResults) {
+>>     New-VM -VMFilePath $SearchResult -VMHost $VMHost -Location $VMFolder -RunAsync -ErrorAction SilentlyContinue
+>>    }
+>> }
+PS /Users/ned> $dsname
+Source-VolA
+PS /Users/ned> $Datastore
+PS /Users/ned> $Datastore = Get-Datastore
+PS /Users/ned> $Datastore                
+
+Name                               FreeSpaceGB      CapacityGB
+----                               -----------      ----------
+snap-69fca307-Source-VolA            1,022.328       1,023.750
+NASH-Pure03                          5,436.117      20,479.750
+CloudSnapDemo                        6,057.143       6,143.750
+NASH-Pure02                          3,122.896       4,095.750
+VVOL                             1,048,157.875   1,048,576.000
+NASH-ISO                             2,216.184       2,252.750
+NASH-Pure01                         27,523.507      35,839.750
+FA1-CS1                              6,765.685      12,287.750
+FA1-CS2                              6,759.590      12,287.750
+FA1-CS3                              6,753.938      12,287.750
+FA1-CS4                              6,779.581      12,287.750
+host2-local datastore                  317.590         319.000
+host1-local datastore                  391.595         415.000
+
+PS /Users/ned> $Datastore = Get-Datastore
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
+>> }
+PS /Users/ned> $dsname
+snap-69fca307-Source-VolA
+PS /Users/ned> $dsname   = "Source-VolA"
+PS /Users/ned> $Datastore = Get-Datastore
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
+>> }
+PS /Users/ned> $Dsname
+snap-69fca307-Source-VolA
+PS /Users/ned> 
+PS /Users/ned> 
+PS /Users/ned> $vcenter  = "VC1.ne-lab.local"
+PS /Users/ned> $vcuser   = "administrator@puremagic.local"
+PS /Users/ned> $vcpass   = "P@ssword1"
+PS /Users/ned> $endpoint = "nelab-flasharray2.ne-lab.local"
+PS /Users/ned> $podname  = "DRPod-Target"
+PS /Users/ned> $cluster  = "Prod"
+PS /Users/ned> $dsname   = "Source-VolA"
+PS /Users/ned> $user = "pureuser"
+PS /Users/ned> $password = "P@ssword1"
+PS /Users/ned> $cred = Get-Credential -Message "Enter credentials for Pure Array"
+
+PowerShell credential request
+Enter credentials for Pure Array
+User: pureuser
+Password for user pureuser: *********
+
+PS /Users/ned> # imports
+PS /Users/ned> Import-Module PureStoragePowerShellSDK2
+PS /Users/ned> Import-Module vmware.powercli
+PS /Users/ned> # Connect to vCenter
+PS /Users/ned> Connect-VIserver -Force $vcenter -user $vcuser -password $vcpass
+
+Name                           Port  User
+----                           ----  ----
+VC1.ne-lab.local               443   PUREMAGIC.LOCAL\Administrator
+
+PS /Users/ned> # Promote the DR Site Pod
+PS /Users/ned> # $promote = "purepod promote $podname"
+PS /Users/ned> # New-PfaCLICommand -EndPoint $endpoint -CommandText $promote -UserName $username -Password (ConvertTo-SecureString -AsPlainText $password -Force)
+PS /Users/ned> # Invoke-Pfa2CLICommand -Credential $cred -EndPoint $endpoint -CommandText $promote
+PS /Users/ned> # or the following:
+PS /Users/ned> # $RemotePod = Get-Pfa2Pod -Name $podname
+PS /Users/ned> # Update-Pfa2Pod -Array $TargetArray -Name $RemotePod.Name  -RequestedPromotionState "promoted"
+PS /Users/ned> # From Jase: connect to target pod and promote it
+PS /Users/ned> Connect-Pfa2Array -IgnoreCertificateError -Endpoint $endpoint -Credential $cred
+
+ArrayName                      ApiVersion
+---------                      ----------
+nelab-flasharray2.ne-lab.local 2.26
+
+PS /Users/ned> $ADRPOD = Get-Pfa2Pod -Name $podname
+PS /Users/ned> Update-Pfa2Pod -Name $ADRPOD.Name -RequestedPromotionState "promoted" #promote the pod
+
+Id                      : 17fcc220-e3d6-8c33-a85f-73cfaacdec7e
+Name                    : DRPod-Target
+Arrays                  : {@{Id='10c87e0a-001a-47b8-8719-a2096197c698'; Name='NELab-FlashArray2'; MediatorStatus='online'; 
+                          PreElected=False; Status='online'}}
+Destroyed               : False
+FailoverPreferences     : {}
+Footprint               : 361421442
+Mediator                : purestorage
+MediatorVersion         : 
+Source                  : 
+Space                   : @{DataReduction=1; Shared=0; Snapshots=0; ThinProvisioning=1; TotalPhysical=361421442; 
+                          TotalProvisioned=1099511627776; TotalReduction=1; Unique=361421442; Virtual=0; 
+                          UsedProvisioned=1099511627776; Replication=0}
+TimeRemaining           : 
+LinkSourceCount         : 1
+LinkTargetCount         : 0
+PromotionStatus         : promoting
+RequestedPromotionState : promoted
+ArrayCount              : 1
+EradicationConfig       : @{ManualEradication='all-enabled'}
+QuotaLimit              : 0
+
+PS /Users/ned> #
+PS /Users/ned> # Wait for the DR Site Pod to be promoted
+PS /Users/ned> $podstatus = "purepod list $podname"
+PS /Users/ned> do {
+>>     Write-Host "Waiting for Pod Promotion"
+>>     Start-Sleep -Milliseconds 500
+>>     $test = Invoke-Pfa2CLICommand -EndPoint $endpoint -CommandText $podstatus -Credential $cred
+>> } while ($test | select-string -pattern "promoting")
+Waiting for Pod Promotion
+PS /Users/ned> $VMHost = Get-VMhost | Select-Object -First 1
+PS /Users/ned> $EsxCli = Get-EsxCli -VMHost $VMhost -V2
+PS /Users/ned> $Snaps = $esxcli.storage.vmfs.snapshot.list.invoke()
+PS /Users/ned> if ($Snaps.Count -gt 0) {
+>>     Foreach ($Snap in $Snaps) {
+>>         Write-Host "Snapshot Found: $($Snap.VolumeName)"
+>>         $esxcli.storage.vmfs.snapshot.resignature.invoke(@{volumelabel=$($Snap.VolumeName)})
+>>     }
+>> } else {
+>>     Write-Host "No Snapshot volumes found"
+>> }
+No Snapshot volumes found
+PS /Users/ned> $Datastore = Get-Datastore
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
+>> }
+PS /Users/ned> $VMFolder  = Get-Folder -Type VM -Name "Discovered virtual machine"
+PS /Users/ned> foreach($Datastore in $Datastore) {
+>>     # Searches for .VMX Files in datastore variable
+>>     $ds = Get-Datastore -Name $Datastore | %{Get-View $_.Id}
+>>     $SearchSpec = New-Object VMware.Vim.HostDatastoreBrowserSearchSpec
+>>     $SearchSpec.matchpattern = "*.vmx"
+>>     $dsBrowser = Get-View $ds.browser
+>>     $DatastorePath = "[" + $ds.Summary.Name + "]"
+>>     # Find all .VMX file paths in Datastore variable and filters out .snapshot
+>>     $SearchResults = $dsBrowser.SearchDatastoreSubFolders($DatastorePath,$SearchSpec) | Where-Object {$_.FolderPath -notmatch ".snapshot"} | %{$_.FolderPath + $_.File.Path}
+>>     # Register all .VMX files with vCenter
+>>     foreach($SearchResult in $SearchResults) {
+>>     New-VM -VMFilePath $SearchResult -VMHost $VMHost -Location $VMFolder -RunAsync -ErrorAction SilentlyContinue
+>>    }
+>> }
+
+Name                           State      % Complete Start Time   Finish Time
+----                           -----      ---------- ----------   -----------
+RegisterVM_Task                Running             0 03:42:13 PM  
+
+PS /Users/ned> 

@@ -47,7 +47,7 @@ if ($Snaps.Count -gt 0) {
     Write-Host "No Snapshot volumes found"
 }
 
-# convert the shrt $dsname from above to the long "snap.name"
+# convert the short $dsname from above to the long "snap.name"
 $Datastore = Get-Datastore
 foreach($Datastore in $Datastore) {
     if ((Get-Datastore -name $Datastore) -like "*$dsname*"){$dsname = $Datastore.name}
