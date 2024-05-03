@@ -1,8 +1,15 @@
 #####
+# **********************************************************Disclaimer****************************************************************************************
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 # Work in progress
+# Ned's repo: https://github.com/nedegan/PureStorage
+# Author Ned Egan negan@purestorage.com) -/5/1/2024-
+# Co-Author Bob Clarke (bclarke@purestorage.com)
+##### (edited) 
 
-#Autor Ned Egan -/5/1/2024-
-#####
 $vcenter  = "VC1.ne-lab.local"
 $vcuser   = "administrator@puremagic.local"
 $vcpass   = "P@ssword1"
